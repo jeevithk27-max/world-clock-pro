@@ -1,0 +1,39 @@
+
+# WORLD CLOCK PRO 🌍
+
+A minimal and professional real-time World Clock application.
+
+## Features
+
+- Real-time analog clock
+- Hour, minute and second hands
+- Thin futuristic circular outline
+- Digital time with AM/PM
+- India as default location
+- Multiple world time zones
+- Search and add cities
+- Remove clocks
+- 12-hour and 24-hour formats
+- Dark and light themes
+- Responsive design
+
+## Technologies
+
+- HTML5
+- CSS3
+- JavaScript
+- Intl DateTimeFormat API
+
+## How to Run
+
+1. Download the project.
+2. Open index.html in your browser.
+3. Enjoy real-time global clocks.
+
+## Developer
+
+World Clock Pro - Web Development Project.
+
+## License
+
+MIT License

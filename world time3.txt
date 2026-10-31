@@ -1,0 +1,395 @@
+
+/* =================================
+   WORLD CLOCK PRO
+   REAL-TIME CLOCK ENGINE
+================================= */
+
+const availableCities = [
+    { name: "India", zone: "Asia/Kolkata" },
+    { name: "New York", zone: "America/New_York" },
+    { name: "London", zone: "Europe/London" },
+    { name: "Dubai", zone: "Asia/Dubai" },
+    { name: "Tokyo", zone: "Asia/Tokyo" },
+    { name: "Sydney", zone: "Australia/Sydney" },
+    { name: "Singapore", zone: "Asia/Singapore" },
+    { name: "Paris", zone: "Europe/Paris" },
+    { name: "Berlin", zone: "Europe/Berlin" },
+    { name: "Toronto", zone: "America/Toronto" },
+    { name: "Los Angeles", zone: "America/Los_Angeles" },
+    { name: "Chicago", zone: "America/Chicago" },
+    { name: "Hong Kong", zone: "Asia/Hong_Kong" },
+    { name: "Seoul", zone: "Asia/Seoul" },
+    { name: "Bangkok", zone: "Asia/Bangkok" },
+    { name: "Kuala Lumpur", zone: "Asia/Kuala_Lumpur" },
+    { name: "Riyadh", zone: "Asia/Riyadh" },
+    { name: "Moscow", zone: "Europe/Moscow" },
+    { name: "Auckland", zone: "Pacific/Auckland" },
+    { name: "Cape Town", zone: "Africa/Johannesburg" }
+];
+
+// India is the default location
+
+let cities = [
+    availableCities[0]
+];
+
+// Default time format: 12 hours
+
+let timeFormat = "12";
+
+// Get HTML elements
+
+const clockGrid = document.getElementById("clockGrid");
+const citySearch = document.getElementById("citySearch");
+const cityOptions = document.getElementById("cityOptions");
+const addCityBtn = document.getElementById("addCityBtn");
+const timeFormatSelect = document.getElementById("timeFormat");
+const themeBtn = document.getElementById("themeBtn");
+const clockCount = document.getElementById("clockCount");
+const message = document.getElementById("message");
+
+
+// LOAD CITY SUGGESTIONS
+
+function loadCityOptions() {
+    cityOptions.innerHTML = "";
+
+    availableCities.forEach(city => {
+        const option = document.createElement("option");
+        option.value = city.name;
+        cityOptions.appendChild(option);
+    });
+}
+
+
+// CREATE ANALOG CLOCK CARD
+
+function createClockCard(city, index) {
+
+    const numbers = Array.from({ length: 12 }, (_, i) => {
+
+        const angle = (i + 1) * Math.PI / 6;
+
+        const x = 95 + 76 * Math.sin(angle);
+        const y = 95 - 76 * Math.cos(angle);
+
+        return `
+            <span class="number"
+                style="left:${x}px; top:${y}px">
+                ${i + 1}
+            </span>
+        `;
+
+    }).join("");
+
+    const ticks = Array.from({ length: 60 }, (_, i) => {
+
+        return `
+            <span class="tick ${i % 5 === 0 ? "major" : ""}"
+                style="transform:translateX(-50%) rotate(${i * 6}deg)">
+            </span>
+        `;
+
+    }).join("");
+
+    return `
+        <article class="clock-card">
+
+            <h3 class="city-name">${city.name}</h3>
+
+            <p class="city-zone">${city.zone}</p>
+
+            <div class="clock">
+
+                ${ticks}
+                ${numbers}
+
+                <div class="hand hour" id="hour-${index}"></div>
+                <div class="hand minute" id="minute-${index}"></div>
+                <div class="hand second" id="second-${index}"></div>
+
+                <div class="center-dot"></div>
+
+            </div>
+
+            <div class="digital-time" id="digital-${index}">
+                --:--:--
+            </div>
+
+            <p class="date-text" id="date-${index}">
+                Loading...
+            </p>
+
+            <button class="remove-btn"
+                data-index="${index}">
+                Remove Clock
+            </button>
+
+        </article>
+    `;
+}
+
+
+// RENDER CLOCKS
+
+function renderClocks() {
+
+    clockGrid.innerHTML = cities
+        .map((city, index) => createClockCard(city, index))
+        .join("");
+
+    clockCount.textContent =
+        `${cities.length} ${cities.length === 1 ? "location" : "locations"}`;
+
+    updateClocks();
+}
+
+
+// GET ACCURATE TIME FOR EACH TIME ZONE
+
+function getTimeParts(date, zone) {
+
+    const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: zone,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+    }).formatToParts(date);
+
+    const getValue = type =>
+        Number(parts.find(part => part.type === type).value);
+
+    return {
+        hour: getValue("hour"),
+        minute: getValue("minute"),
+        second: getValue("second")
+    };
+}
+
+
+// UPDATE ALL CLOCKS
+
+function updateClocks() {
+
+    const now = new Date();
+
+    cities.forEach((city, index) => {
+
+        const { hour, minute, second } =
+            getTimeParts(now, city.zone);
+
+        // Calculate analog hand angles
+
+        const hourAngle =
+            (hour % 12) * 30 +
+            minute * 0.5 +
+            second / 120;
+
+        const minuteAngle =
+            minute * 6 +
+            second * 0.1;
+
+        const secondAngle =
+            second * 6;
+
+        // Hour hand
+
+        document.getElementById(`hour-${index}`)
+            .style.transform =
+            `translateX(-50%) rotate(${hourAngle}deg)`;
+
+        // Minute hand
+
+        document.getElementById(`minute-${index}`)
+            .style.transform =
+            `translateX(-50%) rotate(${minuteAngle}deg)`;
+
+        // Second hand
+
+        document.getElementById(`second-${index}`)
+            .style.transform =
+            `translateX(-50%) rotate(${secondAngle}deg)`;
+
+        // Digital time
+
+        let displayHour = hour;
+        let period = "";
+
+        if (timeFormat === "12") {
+
+            period = hour >= 12 ? "PM" : "AM";
+            displayHour = hour % 12 || 12;
+
+        }
+
+        const formattedTime = [
+            String(displayHour).padStart(2, "0"),
+            String(minute).padStart(2, "0"),
+            String(second).padStart(2, "0")
+        ].join(":");
+
+        document.getElementById(`digital-${index}`)
+            .innerHTML = timeFormat === "12"
+                ? `${formattedTime}<span class="period">${period}</span>`
+                : formattedTime;
+
+        // Local date
+
+        const formattedDate =
+            new Intl.DateTimeFormat("en-US", {
+                timeZone: city.zone,
+                weekday: "long",
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            }).format(now);
+
+        document.getElementById(`date-${index}`)
+            .textContent = formattedDate;
+
+    });
+}
+
+
+// ADD CITY
+
+function addCity() {
+
+    const searchValue =
+        citySearch.value.trim().toLowerCase();
+
+    if (!searchValue) {
+        showMessage("Please enter a city name.");
+        return;
+    }
+
+    const city = availableCities.find(item =>
+        item.name.toLowerCase() === searchValue ||
+        item.zone.toLowerCase() === searchValue
+    );
+
+    if (!city) {
+        showMessage("City not found. Select a suggested city.");
+        return;
+    }
+
+    const alreadyExists = cities.some(
+        item => item.zone === city.zone
+    );
+
+    if (alreadyExists) {
+        showMessage("This city is already in your dashboard.");
+        return;
+    }
+
+    cities.push(city);
+
+    citySearch.value = "";
+
+    renderClocks();
+
+    showMessage(`${city.name} clock added successfully.`);
+}
+
+
+// REMOVE CITY
+
+clockGrid.addEventListener("click", event => {
+
+    const button = event.target.closest(".remove-btn");
+
+    if (!button) return;
+
+    const index = Number(button.dataset.index);
+
+    const removedCity = cities[index];
+
+    cities.splice(index, 1);
+
+    renderClocks();
+
+    showMessage(`${removedCity.name} clock removed.`);
+});
+
+
+// TIME FORMAT SWITCH
+
+timeFormatSelect.addEventListener("change", event => {
+
+    timeFormat = event.target.value;
+
+    updateClocks();
+
+});
+
+
+// DARK AND LIGHT THEME
+
+themeBtn.addEventListener("click", () => {
+
+    document.body.classList.toggle("dark");
+
+    const isDark =
+        document.body.classList.contains("dark");
+
+    themeBtn.textContent = isDark ? "☾" : "☀";
+
+    localStorage.setItem(
+        "worldClockTheme",
+        isDark ? "dark" : "light"
+    );
+
+});
+
+
+// LOAD SAVED THEME
+
+const savedTheme =
+    localStorage.getItem("worldClockTheme");
+
+if (savedTheme === "dark") {
+
+    document.body.classList.add("dark");
+    themeBtn.textContent = "☾";
+
+}
+
+
+// SHOW MESSAGE
+
+function showMessage(text) {
+
+    message.textContent = text;
+
+    clearTimeout(showMessage.timer);
+
+    showMessage.timer = setTimeout(() => {
+        message.textContent = "";
+    }, 3000);
+
+}
+
+
+// EVENT LISTENERS
+
+addCityBtn.addEventListener("click", addCity);
+
+citySearch.addEventListener("keydown", event => {
+
+    if (event.key === "Enter") {
+        addCity();
+    }
+
+});
+
+
+// START APPLICATION
+
+loadCityOptions();
+
+renderClocks();
+
+// Update every second
+
+setInterval(updateClocks, 1000);

@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="A professional real-time world clock with futuristic analog clocks and global time zones.">
+
+    <title>World Clock Pro | Global Time</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="brand">
+            <span class="brand-icon">◉</span>
+            <div>
+                <h1>WORLD CLOCK</h1>
+                <p>GLOBAL TIME DASHBOARD</p>
+            </div>
+        </div>
+
+        <button id="themeBtn" class="theme-btn"
+            aria-label="Switch theme">
+            ☀
+        </button>
+    </header>
+
+    <main>
+
+        <section class="hero">
+            <p class="eyebrow">WORLDWIDE TIME TRACKER</p>
+            <h2>Time without boundaries.</h2>
+            <p class="hero-description">
+                Explore accurate real-time clocks from around the world.
+            </p>
+        </section>
+
+        <section class="toolbar">
+            <div class="search-area">
+                <input
+                    type="search"
+                    id="citySearch"
+                    list="cityOptions"
+                    placeholder="Search a city or time zone..."
+                    autocomplete="off"
+                    aria-label="Search cities"
+                >
+
+                <datalist id="cityOptions"></datalist>
+
+                <button id="addCityBtn" class="add-btn">
+                    + Add Clock
+                </button>
+            </div>
+
+            <div class="format-area">
+                <span>TIME FORMAT</span>
+                <select id="timeFormat" aria-label="Time format">
+                    <option value="24">24 HOURS</option>
+                    <option value="12">12 HOURS</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="dashboard-heading">
+            <div>
+                <h3>Global Time Zones</h3>
+                <p id="clockCount">6 locations</p>
+            </div>
+            <span class="live-indicator">
+                <span class="live-dot"></span>
+                LIVE UPDATES
+            </span>
+        </section>
+
+        <section id="clockGrid" class="clock-grid">
+            <!-- Clock cards are created by JavaScript -->
+        </section>
+
+        <p id="message" class="message" role="status"></p>
+
+    </main>
+
+    <footer>
+        <p>WORLD CLOCK PRO</p>
+        <span>Designed for precision. Built for the world.</span>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
